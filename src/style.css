@@ -1,0 +1,40 @@
+/* src/style.css — نسخه نهایی و بدون خطا */
+@import url('https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@v30.1.0/dist/font-face.css');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    @apply font-vazir;
+  }
+  body {
+    @apply min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 text-slate-800;
+    direction: rtl;
+  }
+  .dark body {
+    @apply bg-gradient-to-br from-slate-950 via-blue-950 to-slate-900 text-slate-100;
+  }
+}
+
+@layer components {
+  .logo-glow {
+    @apply absolute -inset-6 rounded-full bg-primary-500/40 blur-3xl animate-pulse-slow -z-10;
+  }
+  .avatar {
+    @apply w-12 h-12 rounded-full bg-primary-500 flex items-center justify-center text-white text-xl shadow-glow;
+  }
+  .dark .avatar {
+    @apply bg-primary-600 shadow-glow-lg; /* عوض شد به 600 که وجود داره */
+  }
+  .menu-item {
+    @apply flex items-center gap-4 px-5 py-3 rounded-xl text-white/90 font-medium transition-all duration-300 hover:bg-white/20 hover:-translate-x-2 hover:shadow-xl;
+  }
+  .menu-item.active {
+    @apply bg-white/25 shadow-glow;
+  }
+  .menu-item.logout {
+    @apply text-red-400 hover:bg-red-400/20;
+  }
+}
