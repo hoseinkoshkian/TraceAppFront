@@ -222,8 +222,8 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import jalali from 'jalali-moment'
-import { useTasks } from "@/api/task.api.js"
-
+import {useTasks, useUpdateTask} from "@/api/task.api.js"
+import {toJalali} from '../../utils/date/to_jalali.js'
 const tasks = ref([])
 
 // واکشی داده‌ها از API
@@ -235,13 +235,13 @@ watch(tasksData, (newVal) => {
     tasks.value = newVal.data.results.map(task => ({
       id: task.id,
       title: task.title,
-      date: jalali(task.start_datetime).format('jYYYY-jMM-jDD'),
+      date: toJalali(task.start_datetime),           // ✅ شمسی
       time: jalali(task.start_datetime).format('HH:mm'),
       completed: task.completed
     }))
   }
 }, { immediate: true })
-
+console.log('tasks: ' , tasks)
 // تاریخ و زمان
 const j = (date) => jalali(date || undefined).locale('fa')
 const currentMonthJalali = ref(j())
@@ -292,7 +292,8 @@ const weekViewDays = computed(() => {
 const tasksByDate = computed(() => {
   const map = {}
   tasks.value.forEach(t => {
-    if (!map[t.date]) map[t.date] = []
+    console.log(t)
+    if (!map[t.start]) map[t.date] = []
     map[t.date].push(t)
   })
   return map
@@ -307,14 +308,25 @@ const viewBtnClass = (v) => view.value === v
 const dragStart = (e, id) => { draggedTaskId = id; e.dataTransfer.setData('taskId', id) }
 const startLongPress = (id) => { longPressTimer = setTimeout(() => draggedTaskId = id, 600) }
 const endLongPress = () => clearTimeout(longPressTimer)
+
+
+const { mutate: mutateTaskUpdate } = useUpdateTask()
+
 const onDrop = (e, targetDate) => {
   const id = draggedTaskId || e.dataTransfer.getData('taskId')
   if (id) {
     const task = tasks.value.find(t => t.id == id)
-    if (task && task.date !== targetDate) task.date = targetDate
+    if (task && task.date !== targetDate) {
+      // آپدیت UI
+      task.date = targetDate
+
+      // آپدیت سرور
+      mutateTaskUpdate({ id: task.id, updates: { start_datetime: targetDate + 'T' + (task.time || '00:00:00') + 'Z' } })
+    }
   }
   draggedTaskId = null
 }
+
 
 // ناوبری ماه
 const prev = () => currentMonthJalali.value = currentMonthJalali.value.subtract(1, 'jMonth')

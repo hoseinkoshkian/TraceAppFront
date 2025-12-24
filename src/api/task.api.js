@@ -17,7 +17,7 @@ class TaskAPI extends BaseAPI {
     }
 
     updateTask(id, updates) {
-        return this.patch(`/tasks/${id}`, updates)
+        return this.patch(`/api/v1/calendar/tasks/${id}/update/`, updates)
     }
 
     deleteTask(id) {
@@ -33,4 +33,11 @@ export function useTasks() {
 
 export function useAddTask() {
     return useMutation((task) => taskAPI.addTask(task), { invalidate: ['tasks'] })
+}
+
+export function useUpdateTask() {
+    return useMutation(
+        ({ id, updates }) => taskAPI.updateTask(id, updates),
+        { invalidate: ['tasks'] }
+    )
 }
