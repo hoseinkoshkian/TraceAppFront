@@ -31,13 +31,19 @@ export function useTasks() {
     return useQuery('tasks', () => taskAPI.fetchTasks(), { staleTime: 1000 * 60 })
 }
 
-export function useAddTask() {
-    return useMutation((task) => taskAPI.addTask(task), { invalidate: ['tasks'] })
-}
 
 export function useUpdateTask() {
     return useMutation(
         ({ id, updates }) => taskAPI.updateTask(id, updates),
         { invalidate: ['tasks'] }
+    )
+}
+
+export function useAddTask() {
+    return useMutation(
+        (task) => taskAPI.addTask(task),
+        {
+            invalidate: ['tasks']
+        }
     )
 }
