@@ -220,29 +220,46 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import jalali from 'jalali-moment'
+import { useTasks } from "@/api/task.api.js"
 
+const tasks = ref([])
+
+// واکشی داده‌ها از API
+const { data: tasksData, status, error, refetch } = useTasks()
+
+// تبدیل داده‌های API به فرمت داخلی
+watch(tasksData, (newVal) => {
+  if (newVal?.data?.results) {
+    tasks.value = newVal.data.results.map(task => ({
+      id: task.id,
+      title: task.title,
+      date: jalali(task.start_datetime).format('jYYYY-jMM-jDD'),
+      time: jalali(task.start_datetime).format('HH:mm'),
+      completed: task.completed
+    }))
+  }
+}, { immediate: true })
+
+// تاریخ و زمان
 const j = (date) => jalali(date || undefined).locale('fa')
 const currentMonthJalali = ref(j())
 
+// ویو و مودال‌ها
 const view = ref('month')
 const showAddModal = ref(false)
 const selectedDayDetail = ref(null)
 const newTask = ref({ title: '', time: '', date: '' })
 
+// درگ و دراپ
 let draggedTaskId = null
 let longPressTimer = null
 
-const tasks = ref([
-  { id: 1, title: 'ورزش صبحگاهی', date: j().format('jYYYY-jMM-jDD'), time: '07:00', completed: false },
-  { id: 2, title: 'جلسه با مشتری', date: j().add(1, 'day').format('jYYYY-jMM-jDD'), time: '14:30', completed: false },
-  { id: 3, title: 'خرید از سوپرمارکت', date: j().format('jYYYY-jMM-jDD'), time: '18:00', completed: true },
-  { id: 4, title: 'مطالعه کتاب', date: j().format('jYYYY-jMM-jDD'), time: null, completed: false },
-])
 
 const weekDays = ['ش', 'ی', 'د', 'س', 'چ', 'پ', 'ج']
 const isDesktop = computed(() => window.innerWidth >= 1024)
+
 
 const daysInMonth = computed(() => {
   const start = currentMonthJalali.value.clone().startOf('jMonth').startOf('week')
@@ -262,6 +279,7 @@ const daysInMonth = computed(() => {
   return days
 })
 
+// ویو هفته
 const weekViewDays = computed(() => {
   const start = currentMonthJalali.value.clone().startOf('week')
   return Array.from({ length: 7 }, (_, i) => {
@@ -270,6 +288,7 @@ const weekViewDays = computed(() => {
   })
 })
 
+// گروه‌بندی تسک‌ها بر اساس تاریخ
 const tasksByDate = computed(() => {
   const map = {}
   tasks.value.forEach(t => {
@@ -279,28 +298,31 @@ const tasksByDate = computed(() => {
   return map
 })
 
+// کلاس دکمه‌های ویو
 const viewBtnClass = (v) => view.value === v
     ? 'px-6 py-2.5 bg-blue-600 text-white rounded-full font-bold shadow-md'
     : 'px-6 py-2.5 bg-gray-100 text-gray-700 rounded-full font-medium hover:bg-gray-200 transition'
 
+// درگ و دراپ
 const dragStart = (e, id) => { draggedTaskId = id; e.dataTransfer.setData('taskId', id) }
 const startLongPress = (id) => { longPressTimer = setTimeout(() => draggedTaskId = id, 600) }
 const endLongPress = () => clearTimeout(longPressTimer)
-
 const onDrop = (e, targetDate) => {
-  const id = draggedTaskId || Number(e.dataTransfer.getData('taskId') || 0)
+  const id = draggedTaskId || e.dataTransfer.getData('taskId')
   if (id) {
-    const task = tasks.value.find(t => t.id === id)
+    const task = tasks.value.find(t => t.id == id)
     if (task && task.date !== targetDate) task.date = targetDate
   }
   draggedTaskId = null
 }
 
+// ناوبری ماه
 const prev = () => currentMonthJalali.value = currentMonthJalali.value.subtract(1, 'jMonth')
 const next = () => currentMonthJalali.value = currentMonthJalali.value.add(1, 'jMonth')
 const goToday = () => currentMonthJalali.value = j()
 const setView = (v) => { if (isDesktop.value) view.value = v }
 
+// باز کردن جزئیات روز
 const openDayDetail = (date) => selectedDayDetail.value = date
 const openAddModalWithDate = (date) => {
   newTask.value.date = date.format('jYYYY-jMM-jDD')
@@ -308,11 +330,13 @@ const openAddModalWithDate = (date) => {
   selectedDayDetail.value = null
 }
 
+// تغییر وضعیت تکمیل تسک
 const toggleTask = (id) => {
-  const task = tasks.value.find(t => t.id === id)
+  const task = tasks.value.find(t => t.id == id)
   if (task) task.completed = !task.completed
 }
 
+// اضافه کردن تسک جدید
 const addTask = () => {
   if (!newTask.value.title.trim()) return
   const date = newTask.value.date || currentMonthJalali.value.format('jYYYY-jMM-jDD')
@@ -327,6 +351,7 @@ const addTask = () => {
   showAddModal.value = false
 }
 
+// مدیریت رویدادهای ماوس و تاچ
 onMounted(() => {
   document.addEventListener('touchend', endLongPress)
   document.addEventListener('mouseup', endLongPress)

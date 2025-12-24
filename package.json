@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@vueuse/core": "^14.0.0",
+    "axios": "^1.13.2",
     "dayjs": "^1.11.19",
     "jalali-dayjs": "^0.0.1",
     "jalali-moment": "^3.3.11",
