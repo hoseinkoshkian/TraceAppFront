@@ -4,10 +4,13 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+:root {
+  --font-family: 'Vazir', 'Vazirmatn', sans-serif !important;
+}
 
 @layer base {
   html {
-    @apply font-vazir;
+    @apply font-vazir ;
   }
   body {
     @apply min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 text-slate-800;

@@ -3,16 +3,13 @@ import BaseAPI from './BaseAPI.js'
 import { useQuery } from '@/composables/useQuery'
 import { useMutation } from '@/composables/useMutation'
 
-class TaskAPI extends BaseAPI {
+class GoalApi extends BaseAPI {
     constructor() {
         super() // ← دیگر نیاز به baseURL نیست، BaseAPI خودش BASE_URL رو می‌گیرد
     }
 
-    fetchTasks(params = {}) {
-        // params => { year: 1404, month: 10 }
-        return this.get('/api/v1/calendar/tasks/', {
-            params
-        })
+    fetchGoal() {
+        return this.get('/api/v1/calendar/goals') // فقط مسیر endpoint
     }
 
     addTask(task) {
@@ -28,23 +25,23 @@ class TaskAPI extends BaseAPI {
     }
 }
 
-export const taskAPI = new TaskAPI()
+export const goalApi = new GoalApi()
 
-export function useTasks(params) {
-    return useQuery('tasks', () => taskAPI.fetchTasks(params), { staleTime: 1000 * 60 })
+export function useGoals() {
+    return useQuery('goals', () => goalApi.fetchGoal(), { staleTime: 1000 * 60 })
 }
 
 
 export function useUpdateTask() {
     return useMutation(
-        ({ id, updates }) => taskAPI.updateTask(id, updates),
+        ({ id, updates }) => goalApi.updateTask(id, updates),
         { invalidate: ['tasks'] }
     )
 }
 
 export function useAddTask() {
     return useMutation(
-        (task) => taskAPI.addTask(task),
+        (task) => goalApi.addTask(task),
         {
             invalidate: ['tasks']
         }

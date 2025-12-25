@@ -3,7 +3,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 import DashboardView from '../views/Dashboard.vue'
 import CalendarView from '../views/Calender.vue'
-import Login from "@/views/auth/Login.vue";  // ← اسم فایل رو درست کن!
+import Login from "@/views/auth/Login.vue";
+import GoalList from "@/views/Goals/GoalList.vue";  // ← اسم فایل رو درست کن!
 
 const routes = [
     {
@@ -33,11 +34,21 @@ const routes = [
             layout: 'blank'  // ← این خط جادویی!
         }
     },
-    // {
-    //   path: '/login',
-    //   name: 'Login',
-    //   component: () => import('@/views/Login.vue')
-    // },
+    {
+        path: '/goal',
+        meta: {
+            requiresAuth: true,
+            title: 'اهداف | هدف‌من'
+        },
+        children: [
+            {
+                path: '',                    // /goal → لیست اهداف (پیش‌فرض)
+                name: 'GoalsList',
+                component: GoalList,
+                meta: { title: 'لیست اهداف | هدف‌من' }
+            }
+        ]
+    },
     {
         path: '/:catchAll(.*)',
         redirect: '/dashboard'

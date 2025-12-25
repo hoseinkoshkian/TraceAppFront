@@ -1,11 +1,30 @@
+// utils/date/to_jalali.js
 import jalali from 'jalali-moment'
 
-export const toJalali = (date) => {
-    if (!date) return jalali().format('jYYYY-jMM-jDD'); // پیش‌فرض امروز
-    try {
-        return jalali(date).format('jYYYY-jMM-jDD')
-    } catch (e) {
-        console.error('Invalid date for Jalali:', date)
-        return jalali().format('jYYYY-jMM-jDD') // برگردوندن امروز به جای crash
+export const utcToJalali = (date) => {
+    if (!date) return null
+
+    const m = jalali(date).utc()
+
+    if (!m.isValid()) {
+        console.error('Invalid date:', date)
+        return null
     }
+
+    return m.local().format('jYYYY-jMM-jDD')
+}
+
+
+export const jalaliToUtc = (jalaliDate, time = '00:00') => {
+    const m = jalali(
+        `${jalaliDate} ${time}`,
+        'jYYYY-jMM-jDD HH:mm'
+    )
+
+    if (!m.isValid()) {
+        console.error('Invalid Jalali date:', jalaliDate, time)
+        return null
+    }
+
+    return m.utc().format('YYYY-MM-DDTHH:mm:ss[Z]')
 }

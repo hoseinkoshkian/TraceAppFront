@@ -1,67 +1,70 @@
+<!-- src/components/modal/BaseModal.vue -->
 <template>
-  <BaseModal :show="show" @close="$emit('close')">
-
-    <h3 class="text-xl font-bold mb-4 text-center">
-      افزودن برنامه جدید
-    </h3>
-
-    <form @submit.prevent="submit">
-      <input
-          v-model="title"
-          placeholder="عنوان برنامه"
-          class="w-full border rounded-lg px-4 py-3 mb-4"
-      />
-
-      <input
-          v-model="time"
-          type="time"
-          class="w-full border rounded-lg px-4 py-3 mb-6"
-      />
-
-      <div class="flex gap-3">
-        <button
-            type="submit"
-            class="flex-1 bg-blue-600 text-white py-3 rounded-lg"
+  <Transition name="modal-backdrop">
+    <div
+        v-if="show"
+        class="fixed inset-0 bg-black/50 backdrop-blur-md flex items-center justify-center z-50 px-4"
+        @click.self="$emit('close')"
+    >
+      <Transition name="modal-content">
+        <div
+            class="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto transform transition-all duration-300"
+            @click.stop
         >
-          ثبت
-        </button>
+          <!-- دکمه بستن (اختیاری — می‌توانید در کامپوننت والد هم بگذارید) -->
+          <button
+              v-if="showCloseButton"
+              @click="$emit('close')"
+              class="absolute top-4 left-4 text-gray-400 hover:text-gray-600 text-2xl font-light transition"
+              aria-label="بستن"
+          >
+            ×
+          </button>
 
-        <button
-            type="button"
-            @click="$emit('close')"
-            class="flex-1 bg-gray-200 py-3 rounded-lg"
-        >
-          لغو
-        </button>
-      </div>
-    </form>
-
-  </BaseModal>
+          <slot />
+        </div>
+      </Transition>
+    </div>
+  </Transition>
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import BaseModal from './BaseModal.vue'
-
 defineProps({
-  show: Boolean,
-  date: String
+  show: {
+    type: Boolean,
+    required: true
+  },
+  showCloseButton: {
+    type: Boolean,
+    default: true
+  }
 })
 
-const emit = defineEmits(['close', 'submit'])
-
-const title = ref('')
-const time = ref('')
-
-const submit = () => {
-  if (!title.value.trim()) return
-
-  emit('submit', {
-    title: title.value,
-    time: time.value,
-  })
-
-  title.value = ''
-  time.value = ''
-}
+defineEmits(['close'])
 </script>
+
+<style scoped>
+/* انیمیشن backdrop */
+.modal-backdrop-enter-active,
+.modal-backdrop-leave-active {
+  transition: opacity 0.3s ease;
+}
+.modal-backdrop-enter-from,
+.modal-backdrop-leave-to {
+  opacity: 0;
+}
+
+/* انیمیشن محتوای مودال */
+.modal-content-enter-active,
+.modal-content-leave-active {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.modal-content-enter-from {
+  opacity: 0;
+  transform: translateY(30px) scale(0.95);
+}
+.modal-content-leave-to {
+  opacity: 0;
+  transform: translateY(20px) scale(0.95);
+}
+</style>
