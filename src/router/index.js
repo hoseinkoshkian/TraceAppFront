@@ -23,7 +23,7 @@ const routes = [
         meta: {
             requiresAuth: true,
             title: 'داشبورد | هدف‌من'
-        }
+        },
     },
     {
         path: '/calendar',
