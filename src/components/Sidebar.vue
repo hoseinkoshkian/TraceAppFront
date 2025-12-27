@@ -19,7 +19,7 @@ const menuItems = [
     name: 'اهداف',
     icon: 'pi pi-bullseye',
     children: [
-      { name: 'لیست اهداف', icon: 'pi pi-list', to: '/goal/' },
+      { name: 'لیست اهداف', icon: 'pi pi-list', to: '/goal' },
       { name: 'ایجاد هدف جدید', icon: 'pi pi-plus', to: '/dashboard/goal/create' },
     ]
   },

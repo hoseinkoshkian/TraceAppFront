@@ -172,10 +172,11 @@ import jalali from 'jalali-moment'
 import { useAddTask, useTasks, useUpdateTask } from "@/api/task.api.js"
 import { utcToJalali, jalaliToUtc } from '../../utils/date/to_jalali.js'
 import AddTaskModal from "@/components/modal/AddTaskModal.vue"
-import { useGoals } from "@/api/goal.api.js"
+
 import CalendarDay from "@/components/calendar/CalendarDay.vue"
 import CalendarHeader from "@/components/calendar/CalenderHeader.vue"
 import CalenderSidebar from "@/components/calendar/CalenderSidebar.vue";
+import {useGoals} from "@/composables/useGoal.js";
 
 // داده‌های واکنش‌پذیر
 const tasks = ref([])

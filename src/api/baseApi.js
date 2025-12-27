@@ -8,7 +8,7 @@ export default class BaseAPI {
         this.api = axios.create({
             baseURL: BASE_URL, // ← Base URL از config
             headers: {
-                'Content-Type': 'application/json',
+                'Content-Type': 'application/json; charset=utf-8'
             }
         })
 

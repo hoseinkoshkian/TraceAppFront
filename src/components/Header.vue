@@ -2,38 +2,55 @@
 <script setup>
 import { ref } from 'vue'
 
-const user = ref({ username: 'hosein' })
+const user = ref({
+  username: 'hosein',
+  fullName: 'حسین احمدی'
+})
 
 defineEmits(['toggle-sidebar'])
 </script>
 
 <template>
-  <header class="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm border-b border-slate-200 dark:border-slate-800">
-    <div class="flex items-center justify-between px-6 py-4">
+  <header
+      class="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 shadow-sm"
+  >
+    <div class="flex items-center justify-between px-5 py-4">
 
-      <!-- دکمه منوی موبایل -->
+      <!-- دکمه منوی موبایل (فقط موبایل) -->
       <button
           @click="$emit('toggle-sidebar')"
-          id="menu-toggle"
-          class="lg:hidden text-primary-600 text-2xl hover:scale-110 transition"
+          class="md:hidden text-primary-600 text-2xl hover:scale-110 transition-transform duration-200"
+          aria-label="باز کردن منو"
       >
-        <i class="fas fa-bars"></i>
+        <i class="pi pi-bars"></i>
       </button>
 
-      <!-- عنوان -->
-      <div class="text-center flex-1 lg:flex-initial">
-        <h1 class="text-2xl md:text-3xl font-bold text-primary-600">ایستگاه کنترل</h1>
-        <p class="text-sm text-slate-600 dark:text-slate-400 mt-1">ماموریت‌های شما در حال اجراست...</p>
+      <!-- عنوان صفحه اصلی (در موبایل وسط، در دسکتاپ چپ) -->
+      <div class="flex-1 flex justify-center md:justify-start md:flex-initial">
+        <div class="text-center md:text-start">
+          <h1 class="text-2xl md:text-3xl font-bold text-primary-600 tracking-tight">
+            ایستگاه کنترل
+          </h1>
+          <p class="text-sm text-slate-600 dark:text-slate-400 mt-1 hidden sm:block">
+            ماموریت‌های شما در حال اجراست...
+          </p>
+        </div>
       </div>
 
-      <!-- کاربر -->
+      <!-- بخش کاربر (آواتار + نام) -->
       <div class="flex items-center gap-4">
-        <div class="avatar bg-primary-100 dark:bg-primary-900 w-12 h-12 rounded-full flex items-center justify-center">
-          <i class="fas fa-user-astronaut text-primary-600 text-xl"></i>
+        <!-- آواتار -->
+        <div
+            class="avatar relative w-12 h-12 rounded-full bg-primary-100 dark:bg-primary-900/50 flex items-center justify-center ring-4 ring-primary-200 dark:ring-primary-800/50 transition-all hover:ring-primary-300"
+        >
+          <i class="pi pi-user-astronaut text-primary-600 dark:text-primary-400 text-2xl"></i>
+          <span class="absolute bottom-0 end-0 w-3 h-3 bg-green-500 rounded-full ring-2 ring-white"></span>
         </div>
-        <div class="hidden sm:block text-right">
+
+        <!-- نام کاربر (فقط از sm به بالا) -->
+        <div class="hidden sm:block text-end">
           <p class="text-xs text-slate-500 dark:text-slate-400">سلام، فرمانده</p>
-          <p class="font-bold text-slate-800 dark:text-white">{{ user.username }}</p>
+          <p class="font-semibold text-slate-800 dark:text-white">{{ user.fullName }}</p>
         </div>
       </div>
     </div>
