@@ -1,86 +1,104 @@
-<!-- src/layouts/MainLayout.vue -->
-<script setup>
-import Sidebar from "@/components/Sidebar.vue"
-import Header from "@/components/Header.vue"
-import { ref, onMounted, onUnmounted } from 'vue'
-
-// حالت باز/بسته drawer موبایل
-const isSidebarOpen = ref(false)
-
-// آیا دسکتاپ/تبلت هستیم؟
-const isDesktop = ref(false)
-
-// حالت جمع‌شده سایدبار روی دسکتاپ (collapsed)
-const isCollapsed = ref(false)
-
-const toggleSidebar = () => {
-  if (!isDesktop.value) {
-    isSidebarOpen.value = !isSidebarOpen.value
-  }
-}
-
-// تابع toggle برای collapsed (روی دسکتاپ)
-const toggleCollapse = () => {
-  if (isDesktop.value) {
-    isCollapsed.value = !isCollapsed.value
-  }
-}
-
-const updateScreenSize = () => {
-  isDesktop.value = window.innerWidth >= 768
-  if (isDesktop.value) {
-    isSidebarOpen.value = true  // روی دسکتاپ همیشه "باز" به معنای visible
-    // می‌تونی اینجا isCollapsed.value = false بذاری اگر می‌خوای همیشه باز شروع بشه
-  }
-}
-
-onMounted(() => {
-  const btn = document.getElementById('menu-toggle')
-  if (btn) btn.addEventListener('click', toggleSidebar)
-
-  updateScreenSize()
-  window.addEventListener('resize', updateScreenSize)
-})
-
-onUnmounted(() => {
-  window.removeEventListener('resize', updateScreenSize)
-})
-</script>
-
 <template>
   <div class="flex h-screen bg-gray-100 dark:bg-slate-900 overflow-hidden">
-    <!-- Overlay موبایل -->
-    <div
-        v-if="isSidebarOpen && !isDesktop"
-        @click="isSidebarOpen = false"
-        class="fixed inset-0 bg-black/60 z-40 transition-opacity duration-300 backdrop-blur-sm"
-        :class="isSidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'"
-    ></div>
 
-    <!-- سایدبار با پشتیبانی از collapsed -->
+    <!-- Overlay موبایل -->
+    <transition name="fade">
+      <div
+          v-if="isSidebarOpen && !isDesktop"
+          @click="closeSidebar"
+          class="fixed inset-0 bg-black/60 z-40 backdrop-blur-sm"
+      ></div>
+    </transition>
+
+    <!-- Sidebar -->
     <Sidebar
-        :is-open="isSidebarOpen && !isDesktop || isDesktop"
+        :is-open="isSidebarOpen"
         :is-collapsed="isCollapsed && isDesktop"
         :is-desktop="isDesktop"
         @toggle-collapse="toggleCollapse"
-        class="fixed md:static inset-y-0 right-0 z-50
-             transform transition-all duration-500 ease-in-out
-             md:translate-x-0"
+        class="fixed top-0 right-0 h-full z-50 transform transition-transform duration-300 ease-in-out"
         :class="{
-        'translate-x-0': isSidebarOpen && !isDesktop || isDesktop,
-        'translate-x-full': !isSidebarOpen && !isDesktop,
-        'w-72': !isCollapsed || !isDesktop,
-        'w-20': isCollapsed && isDesktop
+        'translate-x-0': isSidebarOpen || isDesktop,
+        'translate-x-full': !isSidebarOpen && !isDesktop
       }"
     />
 
     <!-- محتوای اصلی -->
-    <div class="flex-1 flex flex-col transition-all duration-500">
+    <div
+        :class="[
+        'flex-1 flex flex-col transition-all duration-500 ml-18',
+        isDesktop ? (isCollapsed ? 'mr-20' : 'mr-72') : ''
+      ]"
+    >
       <Header @toggle-sidebar="toggleSidebar" />
 
       <main class="flex-1 overflow-y-auto p-4 md:p-6 bg-gray-50 dark:bg-slate-950">
         <slot />
       </main>
     </div>
+
   </div>
 </template>
+
+<script setup>
+import { ref, onMounted, onUnmounted, watch } from 'vue'
+import Sidebar from '@/components/Sidebar.vue'
+import Header from '@/components/Header.vue'
+
+// وضعیت سایدبار
+const isSidebarOpen = ref(false)
+const isDesktop = ref(window.innerWidth >= 768)
+const isCollapsed = ref(false)
+
+// باز/بسته کردن سایدبار موبایل
+const toggleSidebar = () => {
+  if (!isDesktop.value) isSidebarOpen.value = !isSidebarOpen.value
+}
+const closeSidebar = () => {
+  if (!isDesktop.value) isSidebarOpen.value = false
+}
+
+// جمع/باز کردن سایدبار دسکتاپ
+const toggleCollapse = () => {
+  if (isDesktop.value) isCollapsed.value = !isCollapsed.value
+}
+
+// بروزرسانی وضعیت دسکتاپ و سایدبار
+const updateScreenSize = () => {
+  isDesktop.value = window.innerWidth >= 768
+  if (isDesktop.value) {
+    isSidebarOpen.value = true  // همیشه باز روی دسکتاپ
+  } else {
+    isSidebarOpen.value = false // پیش‌فرض بسته روی موبایل
+  }
+}
+
+// جلوگیری از scroll محتوا پشت drawer موبایل
+watch([isSidebarOpen, isDesktop], () => {
+  if (!isDesktop.value && isSidebarOpen.value) {
+    document.body.style.overflow = 'hidden'
+  } else {
+    document.body.style.overflow = ''
+  }
+})
+
+onMounted(() => {
+  updateScreenSize()
+  window.addEventListener('resize', updateScreenSize)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', updateScreenSize)
+  document.body.style.overflow = ''
+})
+</script>
+
+<style>
+/* Overlay fade */
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.3s;
+}
+.fade-enter-from, .fade-leave-to {
+  opacity: 0;
+}
+</style>

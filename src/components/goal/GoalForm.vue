@@ -1,6 +1,8 @@
 <template>
   <form @submit.prevent="submitForm" class="goal-form">
+    <!-- Grid اصلی فرم -->
     <div class="form-grid">
+
       <!-- عنوان هدف -->
       <div class="field">
         <label class="field-label">
@@ -8,28 +10,13 @@
         </label>
         <InputText
             v-model="form.title"
-            :class="{ 'p-invalid': v$.title.$error }"
+            :class="['input-field', { 'input-error': v$.title.$error }]"
             placeholder="مثال: یادگیری Vue 3 به طور کامل"
-            class="w-full"
             dir="rtl"
         />
-        <small v-if="v$.title.$error" class="p-error">
+        <small v-if="v$.title.$error" class="error-message">
           {{ v$.title.$errors[0].$message }}
         </small>
-      </div>
-
-      <!-- والد اختیاری -->
-      <div class="field col-span-2">
-        <label class="field-label">هدف والد (اختیاری)</label>
-        <AutoComplete
-            v-model="selectedParent"
-            :suggestions="parentOptions"
-            optionLabel="title"
-            placeholder="جستجو بین اهداف..."
-            class="w-full"
-            :forceSelection="true"
-            @complete="searchParents"
-        />
       </div>
 
       <!-- تاریخ شروع -->
@@ -37,31 +24,58 @@
         <label class="field-label">
           تاریخ شروع <span class="required">*</span>
         </label>
-        <date-picker
+        <DatePicker
             v-model="jalaliDate"
             format="jYYYY/jMM/jDD"
             display-format="jYYYY/jMM/jDD"
-            input-class="w-full rounded-lg border px-3 py-2 text-center"
-            :class="{ 'p-invalid': v$.jalaliDate.$error }"
+            :class="['input-field', { 'input-error': v$.jalaliDate.$error }]"
         />
-        <small v-if="v$.jalaliDate.$error" class="p-error">
+        <small v-if="v$.jalaliDate.$error" class="error-message">
           تاریخ شروع الزامی است
         </small>
       </div>
+      <div class="field">
+        <label class="field-label">
+          تاریخ پایان (اختیاری)
+        </label>
+        <DatePicker
+            v-model="jalaliEndDate"
+            format="jYYYY/jMM/jDD"
+            display-format="jYYYY/jMM/jDD"
+            :class="['input-field']"
+            placeholder="اختیاری"
+        />
+        <small class="hint-text">اگر هدف شما زمان‌دار است، تاریخ پایان را وارد کنید</small>
+      </div>
+      <!-- هدف والد (اختیاری) -->
+      <div class="field col-span-full">
+        <label class="field-label">هدف والد (اختیاری)</label>
+        <AutoComplete
+            v-model="selectedParent"
+            :suggestions="parentOptions"
+            optionLabel="title"
+            placeholder="جستجو بین اهداف..."
+            class="input-field"
+            :forceSelection="true"
+            @complete="searchParents"
+        />
+      </div>
 
       <!-- توضیحات -->
-      <div class="field col-span-2">
+      <div class="field col-span-full">
         <label class="field-label">توضیحات</label>
         <Textarea
             v-model="form.description"
             rows="5"
             placeholder="توضیحات بیشتر درباره هدف خود بنویسید..."
-            class="w-full"
+            class="input-field"
             dir="rtl"
         />
       </div>
+
     </div>
 
+    <!-- دکمه‌های فرم -->
     <div class="form-actions">
       <Button
           type="button"
@@ -93,25 +107,31 @@ import Textarea from 'primevue/textarea'
 import Button from 'primevue/button'
 import AutoComplete from 'primevue/autocomplete'
 import DatePicker from 'vue3-persian-datetime-picker'
+import {useToast} from "@/composables/useToast.js";
 
-import { useCreateGoal, useUpdateGoal, useGoals } from '@/composables/useGoal.js'
+const { showSuccess, showError } = useToast()
+
+import { useCreateGoal, useUpdateGoal, useGoals, useGoalDetail } from '@/composables/useGoal.js'
 
 // Props & Emits
-const props = defineProps({initialData: {type: Object, default: () => ({})}})
+const props = defineProps({
+  initialData: { type: Object, default: () => ({}) }
+})
 const emit = defineEmits(['success', 'cancel'])
 
-// State
-const form = ref({title: '', description: ''})
+// State فرم
+const form = ref({ title: '', description: '' })
 const jalaliDate = ref(null)
+const jalaliEndDate = ref(null)
 const selectedParent = ref(null)
 
-// Mutations
+// حالت ویرایش و وضعیت ارسال
 const createMutation = useCreateGoal()
 const updateMutation = useUpdateGoal()
 const isEditMode = computed(() => !!props.initialData?.id)
 const isSubmitting = computed(() => createMutation.isPending.value || updateMutation.isPending.value)
 
-// Validation
+// قوانین اعتبارسنجی
 const rules = {
   title: {
     required: helpers.withMessage('عنوان هدف الزامی است', required),
@@ -121,34 +141,37 @@ const rules = {
     required: helpers.withMessage('تاریخ شروع الزامی است', required)
   }
 }
-const state = computed(() => ({title: form.value.title, jalaliDate: jalaliDate.value}))
+const state = computed(() => ({ title: form.value.title, jalaliDate: jalaliDate.value }))
 const v$ = useVuelidate(rules, state)
 
-// ------------------- Autocomplete والد -------------------
+// Autocomplete اهداف والد
 const parentSearch = ref('')
-const {data: goalsData} = useGoals(parentSearch)
+const { data: goalsData } = useGoals(parentSearch)
 const parentOptions = ref([])
-
-watch(goalsData, (val) => {
-  parentOptions.value = val || []
-})
+watch(goalsData, val => parentOptions.value = val || [])
 
 const searchParents = (event) => {
   parentSearch.value = event.query || ''
 }
 
-console.log(props.initialData)
-watch(() => props.initialData, (val) => {
+// بارگذاری داده اولیه در حالت ویرایش
+watch(() => props.initialData, val => {
   if (val?.id) {
     form.value.title = val.title || ''
     form.value.description = val.description || ''
-
-    // درست کردن Moment معتبر برای date-picker
     jalaliDate.value = val.dateForTable
+    jalaliEndDate.value = val.endDateForTable || null
+    selectedParent.value = val.parent ? { id: val.parent, title: val.parent_title || 'هدف والد' } : null
 
-    selectedParent.value = val.parent
-        ? { id: val.parent, title: val.parent_title || 'هدف والد' }
-        : null
+    if (val.parent){
+      const { data } = useGoalDetail(ref(val.parent))
+      watch(data, (parentData) => {
+        if (parentData) {
+          selectedParent.value = { id: parentData.id, title: parentData.title }
+          parentOptions.value = [selectedParent.value]
+        }
+      }, { immediate: true })
+    }
   } else {
     form.value.title = ''
     form.value.description = ''
@@ -158,48 +181,77 @@ watch(() => props.initialData, (val) => {
     v$.value.$reset()
   }
 }, { immediate: true })
-console.log('hy hyh y')
-console.log(jalaliDate.value)
-// ------------------- Prepare Payload -------------------
+
+// آماده‌سازی داده برای ارسال
 const preparePayload = () => {
   const payload = { title: form.value.title.trim() }
   if (form.value.description?.trim()) payload.description = form.value.description.trim()
-  if (jalaliDate.value) payload.start_datetime = jalaliDate.value.clone().utc().format() // ISO UTC
+  if (jalaliDate.value) {
+    const m = moment(jalaliDate.value, 'jYYYY/jMM/jDD')
+    payload.start_datetime = m.utc().format()
+  }
+  if (jalaliEndDate.value) {
+    const mEnd = moment(jalaliEndDate.value, 'jYYYY/jMM/jDD')
+    payload.end_datetime = mEnd.utc().format()
+  } else {
+
+    payload.end_datetime = null
+  }
   if (selectedParent.value) payload.parent = selectedParent.value.id
   return payload
 }
 
-// ------------------- Submit -------------------
+// ارسال فرم
 const submitForm = async () => {
   const isValid = await v$.value.$validate()
   if (!isValid) return
 
   try {
     if (isEditMode.value) {
-      await updateMutation.mutateAsync({id: props.initialData.id, updates: preparePayload()})
+      await updateMutation.mutateAsync({ id: props.initialData.id, updates: preparePayload() })
+      showSuccess('هدف با موفقیت ویرایش شد!')
     } else {
       await createMutation.mutateAsync(preparePayload())
+      showSuccess('هدف با موفقیت ایجاد شد!')
     }
     emit('success')
   } catch (error) {
     console.error('خطا در ذخیره هدف:', error)
-    alert('خطایی رخ داد. لطفاً دوباره تلاش کنید.')
+    showError('خطایی رخ داد. لطفاً دوباره تلاش کنید.')
   }
 }
 </script>
 
 <style scoped>
+/* ---------- فرم اصلی ---------- */
 .goal-form {
   direction: rtl;
+  font-family: 'Vazir', sans-serif;
+  background: #fff;
+  padding: 1.5rem;
+  border-radius: 0.8rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
 
+/* ---------- شبکه فرم ---------- */
 .form-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: 1fr;
   gap: 1.5rem;
-  margin-bottom: 2rem;
 }
 
+@media (min-width: 768px) {
+  .form-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ---------- ستون کامل ---------- */
+.col-span-full {
+  grid-column: 1 / -1;
+}
+
+/* ---------- فیلدهای فرم ---------- */
 .field {
   display: flex;
   flex-direction: column;
@@ -216,10 +268,32 @@ const submitForm = async () => {
   color: #ef4444;
 }
 
-.col-span-2 {
-  grid-column: 1 / -1;
+.input-field {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  font-size: 0.95rem;
+  transition: all 0.2s;
 }
 
+.input-field:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59,130,246,0.2);
+  outline: none;
+}
+
+.input-error {
+  border-color: #ef4444;
+}
+
+.error-message {
+  color: #ef4444;
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+}
+
+/* ---------- دکمه‌ها ---------- */
 .form-actions {
   display: flex;
   justify-content: flex-end;
@@ -227,9 +301,10 @@ const submitForm = async () => {
   padding-top: 1.5rem;
   border-top: 1px solid #e5e7eb;
 }
-
-.p-error {
-  font-size: 0.85rem;
+.hint-text {
+  color: #64748b;
+  font-size: 0.8rem;
   margin-top: 0.25rem;
 }
+
 </style>

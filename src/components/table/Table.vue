@@ -331,4 +331,12 @@ const formatCellValue = (value) => {
 :deep(.p-button.p-button-sm) {
   font-size: 0.85rem;
 }
+.table-container {
+  overflow-x: auto; /* اسکرول افقی فعال می‌شه وقتی محتوا پهن‌تر باشه */
+  -webkit-overflow-scrolling: touch; /* اسکرول نرم‌تر در موبایل (iOS/Android) */
+}
+
+:deep(.p-datatable-wrapper) {
+  min-width: 600px; /* یا مقداری که حداقل عرض مناسب جدولتون باشه، مثلاً 50rem */
+}
 </style>

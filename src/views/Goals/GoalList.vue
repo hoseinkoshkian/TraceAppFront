@@ -1,6 +1,12 @@
 <!-- src/views/GoalList.vue یا هر مسیر دیگه -->
 <template>
   <div class="goal-list-page">
+    <ConfirmDelete
+        v-model:visible="showDeleteModal"
+        :item-name="selectedGoalForDelete?.title || ''"
+        @confirm="deleteGoal"
+        @cancel="showDeleteModal = false"
+    />
     <Table
         :data="goalsData"
         :columns="tableColumns"
@@ -12,7 +18,7 @@
         @open-create-modal="showCreateModal = true"
         @view="viewGoal"
         @edit="openEditModal"
-        @delete="confirmDelete"
+        @delete="openDeleteModal"
     >
       <!-- اسلات مودال‌ها -->
       <template #modal>
@@ -60,7 +66,9 @@ import Dialog from 'primevue/dialog'
 import GoalForm from '@/components/goal/GoalForm.vue'
 
 import {utcToJalali} from "../../../utils/date/to_jalali.js";
-import {useGoals} from "@/composables/useGoal.js";
+import {useDeleteGoal, useGoals} from "@/composables/useGoal.js";
+import {useToast} from '@/composables/useToast.js';
+import ConfirmDelete from "@/components/ConfirmDelete.vue";
 
 
 // واکشی داده‌های اهداف
@@ -74,6 +82,7 @@ const goalsData = computed(() => {
     id: goal.id,
     title: goal.title || 'بدون عنوان',
     dateForTable: utcToJalali(goal.start_datetime),
+    parent :  goal.parent,
     date: utcToJalali(goal.start_datetime),
     description: goal.description || '—'
   }))
@@ -110,21 +119,35 @@ const onGoalCreated = () => {
   refetch() // بروزرسانی لیست از سرور
 }
 
+
+const showDeleteModal = ref(false)
+const selectedGoalForDelete = ref(null)
+const openDeleteModal = (goal) => {
+  selectedGoalForDelete.value = goal
+  showDeleteModal.value = true
+}
 // باز کردن مودال ویرایش
 const openEditModal = (goal) => {
   selectedGoal.value = { ...goal } // کپی برای جلوگیری از تغییر مستقیم
   showEditModal.value = true
 }
 
-// حذف هدف
-const confirmDelete = (goal) => {
-  if (confirm(`آیا از حذف هدف "${goal.title}" اطمینان دارید؟`)) {
-    // اینجا باید API حذف رو فراخوانی کنی
-    // مثال: await deleteGoal(goal.id)
-    alert('هدف با موفقیت حذف شد (API رو پیاده کن)')
+const { showSuccess, showError } = useToast()
+const deleteMutation = useDeleteGoal()
+const deleteGoal = async () => {
+  if (!selectedGoalForDelete.value) return
+  try {
+    await deleteMutation.mutateAsync(selectedGoalForDelete.value.id)
+    showSuccess('هدف با موفقیت حذف شد!')
     refetch()
+  } catch (error) {
+    showError('خطا در حذف هدف')
+  } finally {
+    selectedGoalForDelete.value = null
+    showDeleteModal.value = false
   }
 }
+
 
 // مشاهده هدف
 const viewGoal = (goal) => {

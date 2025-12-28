@@ -12,13 +12,16 @@ class GoalApi extends BaseAPI {
     createGoal(goal) {
         return this.post('/api/v1/calendar/goals/create/', goal)
     }
-
+    fetchGoalDetail(id) {
+        if (!id) throw new Error('Goal ID is required')
+        return this.get(`/api/v1/calendar/goals/${id}/`) // فرض بر اینکه API این endpoint رو داره
+    }
     updateGoal(id, updates) {
         return this.patch(`/api/v1/calendar/goals/${id}/update/`, updates)
     }
 
     deleteGoal(id) {
-        return this.delete(`/api/v1/calendar/goals/${id}/`)
+        return this.delete(`/api/v1/calendar/goals/${id}/delete/`)
     }
 }
 

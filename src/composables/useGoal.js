@@ -16,6 +16,20 @@ export function useGoals(search = ref('')) {
 
     return { ...result, search }
 }
+
+export function useGoalDetail(id = ref(null)) {
+    const result = useQuery({
+        queryKey: computed(() => ['goalDetail', unref(id)]),
+        queryFn: async () => {
+            if (!unref(id)) return null
+            const res = await goalApi.fetchGoalDetail(unref(id))
+            return res.data
+        },
+        enabled: computed(() => !!unref(id)),
+    })
+
+    return { ...result, id }
+}
 export function useCreateGoal() {
     const queryClient = useQueryClient()
 
