@@ -12,7 +12,6 @@ export default class BaseAPI {
             }
         })
 
-        // interceptor برای پاسخ‌ها
         this.api.interceptors.response.use(
             response => response,
             error => {

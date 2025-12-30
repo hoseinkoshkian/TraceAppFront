@@ -32,7 +32,7 @@
     >
       <Header @toggle-sidebar="toggleSidebar" />
 
-      <main class="flex-1 overflow-y-auto p-4 md:p-6 bg-gray-50 dark:bg-slate-950">
+      <main class="flex-1   overflow-auto p-2 sm:p-4 md:p-6 bg-gray-50 dark:bg-slate-950">
         <slot />
       </main>
     </div>

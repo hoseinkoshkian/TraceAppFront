@@ -1,6 +1,6 @@
 <!-- src/components/table/Table.vue -->
 <template>
-  <div class="table-container">
+  <div class="table-container max-w-[70%]  sm:max-w-[95%]  sm:mx-auto">
     <DataTable
         dir="rtl"
         class="rtl-datatable"
@@ -336,7 +336,5 @@ const formatCellValue = (value) => {
   -webkit-overflow-scrolling: touch; /* اسکرول نرم‌تر در موبایل (iOS/Android) */
 }
 
-:deep(.p-datatable-wrapper) {
-  min-width: 600px; /* یا مقداری که حداقل عرض مناسب جدولتون باشه، مثلاً 50rem */
-}
+
 </style>
