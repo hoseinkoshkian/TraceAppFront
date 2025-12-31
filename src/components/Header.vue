@@ -8,12 +8,22 @@ const user = ref({
 })
 
 defineEmits(['toggle-sidebar'])
+
+// ریفرنس به مودال
+const userProfileModalRef = ref(null)
+
+// وقتی کاربر روی آواتار کلیک کرد
+function openProfile() {
+  userProfileModalRef.value?.open()
+}
+
 </script>
 
 <template>
   <header
       class="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 shadow-sm"
   >
+    <Profile ref="userProfileModalRef" />
     <div class="flex items-center justify-between px-5 py-4">
 
       <!-- دکمه منوی موبایل (فقط موبایل) -->
@@ -38,7 +48,7 @@ defineEmits(['toggle-sidebar'])
       </div>
 
       <!-- بخش کاربر (آواتار + نام) -->
-      <div class="flex items-center gap-4">
+      <div @click="openProfile" class="flex items-center gap-4">
         <!-- آواتار -->
         <div
             class="avatar relative w-12 h-12 rounded-full bg-primary-100 dark:bg-primary-900/50 flex items-center justify-center ring-4 ring-primary-200 dark:ring-primary-800/50 transition-all hover:ring-primary-300"

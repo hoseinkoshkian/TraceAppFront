@@ -18,12 +18,13 @@ const menuItems = [
     name: 'اهداف',
     icon: 'pi pi-bullseye',
     children: [
-      { name: 'لیست اهداف', icon: 'pi pi-list', to: '/goal' },
+      { name: 'لیست اهداف', icon: 'pi pi-list', to: '/dashboard/goal' },
+      { name: 'تسک پترن ها', icon: 'pi pi-list', to: '/dashboard/task-pattern' },
       { name: 'ایجاد هدف جدید', icon: 'pi pi-plus', to: '/dashboard/goal/create' },
     ]
   },
   { name: 'تسک‌ها', icon: 'pi pi-list-check', to: '/tasks' },
-  { name: 'پروفایل', icon: 'pi pi-user', to: '/profile' },
+  { name: 'پروفایل', icon: 'pi pi-user', to: '/dashboard/profile' },
   { name: 'خروج', icon: 'pi pi-sign-out', to: '/login', logout: true },
 ]
 </script>

@@ -5,25 +5,31 @@ import DashboardView from '../views/Dashboard.vue'
 import CalendarView from '../views/Calender.vue'
 import Login from "@/views/auth/Login.vue";
 import GoalList from "@/views/Goals/GoalList.vue";  // ← اسم فایل رو درست کن!
+import ProfileView from "@/views/Profile.vue";
+import MainLayout from "@/layouts/MainLayout.vue";
+import TaskPatter from "@/views/Goals/TaskPatter.vue";
 
 const routes = [
     {
         path: '/',
         name : 'login' ,
+
         component: Login,
         meta: {
             title: 'ورود به سیستم',
             layout: 'blank'  // ← این خط جادویی!
         }
+
     },
     {
         path: '/dashboard',
-        name: 'Dashboard',
-        component: DashboardView,
-        meta: {
-            requiresAuth: true,
-            title: 'داشبورد | هدف‌من'
-        },
+        // component: MainLayout, // Layout بالا
+        children: [
+            { path: '', name: 'Dashboard', component: DashboardView },
+            { path: 'profile', name: 'Profile', component: ProfileView },
+            { path: 'goal', name: 'Goal', component: GoalList },
+            { path: 'task-pattern', name: 'task-patter', component: TaskPatter }
+        ]
     },
     {
         path: '/calendar',

@@ -13,41 +13,31 @@
       <!-- Login Form -->
       <form @submit.prevent="handleSubmit" class="space-y-5">
 
-        <!-- Username / Phone -->
-        <div>
-          <label class="block text-sm text-gray-700 mb-1">
-            نام کاربری یا ایمیل
-          </label>
-          <input
-              v-model="form.phone_number"
-              type="text"
-              placeholder="example@email.com"
-              class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent focus:outline-none transition"
-              required
-          />
-        </div>
+        <BaseInput
+            v-model="form.phone_number"
+            label="شماره تماس یا نام کاربری"
+            placeholder="۰۹۱۳۱۲۳۱۲۳۱"
+            type="text"
+            required
+            @validity="phoneValid = $event"
+        />
 
-        <!-- Password -->
-        <div>
-          <label class="block text-sm text-gray-700 mb-1">
-            رمز عبور
-          </label>
-          <input
-              v-model="form.password"
-              type="password"
-              placeholder="••••••••"
-              class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-transparent focus:outline-none transition"
-              required
-          />
-        </div>
+        <BaseInput
+            v-model="form.password"
+            label="رمز عبور"
+            placeholder="••••••••"
+            type="password"
+            required
+            @validity="passwordValid = $event"
+        />
 
         <!-- Submit Button -->
         <button
             type="submit"
             class="w-full py-3.5 rounded-xl bg-indigo-600 text-white font-semibold hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-300 transition duration-200 disabled:opacity-70"
-
+            :disabled="loginMutation.isPending.value"
         >
-          <span v-if="loginMutation.isPending.value ">
+          <span v-if="loginMutation.isPending.value">
             در حال ورود...
           </span>
           <span v-else>
@@ -70,17 +60,30 @@
 </template>
 
 <script setup>
-import { reactive } from 'vue'
-import { useLogin } from '../../composables/auth/useAuth.js' // مسیر خودت رو چک کن
+import { reactive, ref } from 'vue'
+import { useLogin } from '../../composables/auth/useAuth.js'
+import router from "@/router/index.js";
+import BaseInput from "@/components/base/BaseInput.vue";
+import {useToast} from '@/composables/useToast.js';
+const { showSuccess, showError } = useToast()
 
 const form = reactive({
   phone_number: '',
   password: ''
 })
 
-const loginMutation = useLogin()
+// تعریف متغیرهای اعتبارسنجی
+const phoneValid = ref(false)
+const passwordValid = ref(false)
+
+const loginMutation = useLogin(router)
 
 const handleSubmit = () => {
+  if (!phoneValid.value || !passwordValid.value) {
+    showError('لطفاً فیلدهای الزامی را پر کنید')
+    return
+  }
+
   loginMutation.mutate({
     phone_number: form.phone_number,
     password: form.password
@@ -89,5 +92,5 @@ const handleSubmit = () => {
 </script>
 
 <style scoped>
-/* اختیاری: اگر می‌خوای کمی انیمیشن نرم‌تر داشته باشه */
+/* کمی انیمیشن نرم‌تر */
 </style>

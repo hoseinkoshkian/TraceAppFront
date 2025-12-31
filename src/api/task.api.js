@@ -1,40 +1,67 @@
 // src/api/task.api.js
-import BaseAPI from './BaseAPI.js'
+// --------------------------
+// ابتدا BaseAPI را import می‌کنیم
+// --------------------------
+import BaseAPI from './BaseAPI.js' // فرض بر اینکه BaseAPI default export است
 import { useQuery } from '@/composables/useQuery'
 import { useMutation } from '@/composables/useMutation'
 
+// --------------------------
+// کلاس TaskAPI
+// --------------------------
 class TaskAPI extends BaseAPI {
     constructor() {
-        super() // ← دیگر نیاز به baseURL نیست، BaseAPI خودش BASE_URL رو می‌گیرد
+        super() // BaseAPI خودش BASE_URL را می‌گیرد
     }
 
+    // دریافت لیست تسک‌ها با فیلتر (مثلاً year, month)
     fetchTasks(params = {}) {
-        // params => { year: 1404, month: 10 }
-        return this.get('/api/v1/calendar/tasks/', {
-            params
-        })
+        return this.get('/api/v1/calendar/tasks/', { params })
     }
 
+    // ایجاد تسک جدید
     addTask(task) {
         return this.post('/api/v1/calendar/tasks/create/', task)
     }
 
+    // بروزرسانی جزئی تسک
     updateTask(id, updates) {
         return this.patch(`/api/v1/calendar/tasks/${id}/update/`, updates)
     }
 
+    // حذف تسک
     deleteTask(id) {
-        return this.delete(`/tasks/${id}`)
+        return this.delete(`/api/v1/calendar/tasks/${id}/delete/`)
     }
 }
 
+// --------------------------
+// نمونه آماده استفاده
+// --------------------------
 export const taskAPI = new TaskAPI()
 
-export function useTasks(params) {
-    return useQuery('tasks', () => taskAPI.fetchTasks(params), { staleTime: 1000 * 60 })
+// --------------------------
+// composableها برای Vue Query
+// --------------------------
+
+// دریافت لیست تسک‌ها
+export function useTasks(params = {}) {
+    return useQuery(
+        ['tasks', params],
+        () => taskAPI.fetchTasks(params),
+        { staleTime: 1000 * 60 } // کش 1 دقیقه
+    )
 }
 
+// افزودن تسک جدید
+export function useAddTask() {
+    return useMutation(
+        (task) => taskAPI.addTask(task),
+        { invalidate: ['tasks'] } // invalidate cache بعد از موفقیت
+    )
+}
 
+// بروزرسانی تسک
 export function useUpdateTask() {
     return useMutation(
         ({ id, updates }) => taskAPI.updateTask(id, updates),
@@ -42,11 +69,10 @@ export function useUpdateTask() {
     )
 }
 
-export function useAddTask() {
+// حذف تسک
+export function useDeleteTask() {
     return useMutation(
-        (task) => taskAPI.addTask(task),
-        {
-            invalidate: ['tasks']
-        }
+        (id) => taskAPI.deleteTask(id),
+        { invalidate: ['tasks'] }
     )
 }

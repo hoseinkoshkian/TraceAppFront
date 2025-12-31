@@ -1,6 +1,6 @@
 <!-- src/components/table/Table.vue -->
 <template>
-  <div class="table-container max-w-[70%]  sm:max-w-[95%]  sm:mx-auto">
+  <div class="table-container max-w-[60%]  sm:max-w-[95%]  sm:mx-auto">
     <DataTable
         dir="rtl"
         class="rtl-datatable"

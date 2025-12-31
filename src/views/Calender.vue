@@ -183,20 +183,21 @@ const tasks = ref([])
 const goals = ref([])
 
 // واکشی داده‌ها
-const { data: tasksData } = useTasks()
+// const { data: tasksData } = useTasks()
 const { data: goalsData } = useGoals()
 
-watch(tasksData, (newVal) => {
-  if (newVal?.data?.results) {
-    tasks.value = newVal.data.results.map(task => ({
-      id: task.id,
-      title: task.title,
-      date: utcToJalali(task.start_datetime),
-      time: jalali(task.start_datetime).format('HH:mm'),
-      completed: task.completed
-    }))
-  }
-}, { immediate: true })
+//
+// watch(tasksData, (newVal) => {
+//   if (newVal?.data?.results) {
+//     tasks.value = newVal.data.results.map(task => ({
+//       id: task.id,
+//       title: task.title,
+//       date: utcToJalali(task.start_datetime),
+//       time: jalali(task.start_datetime).format('HH:mm'),
+//       completed: task.completed
+//     }))
+//   }
+// }, { immediate: true })
 
 watch(goalsData, (newVal) => {
   if (newVal?.data?.results) {

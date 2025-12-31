@@ -11,9 +11,15 @@ import 'primeicons/primeicons.css'
 import './style.css'
 import { VueQueryPlugin } from '@tanstack/vue-query'
 const app = createApp(App)
-import Vue3PersianDatetimePicker from 'vue3-persian-datetime-picker'
-app.use(router)
+import {createPinia} from "pinia";
 
+
+import Vue3PersianDatetimePicker from 'vue3-persian-datetime-picker'
+
+const pinia = createPinia()
+
+app.use(router)
+app.use(pinia)
 app.use(PrimeVue, {
     theme: {
         preset: Aura ,

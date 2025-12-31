@@ -4,7 +4,7 @@ import BaseAPI from './BaseAPI.js'
 class AuthApi extends BaseAPI {
     login(credentials) {
         // credentials = { username, password }
-        return this.post('/api/v1/users/auth/token/', credentials)
+        return this.post('/api/v1/users/auth/token/', credentials, { skipAuth: true })
     }
 
     register(data) {

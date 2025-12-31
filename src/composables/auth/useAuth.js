@@ -1,46 +1,31 @@
-// src/composables/useAuth.js
+// composables/auth/useAuth.js
 import { useMutation } from '@tanstack/vue-query'
-import { authApi } from '@/api/auth.api'
-import { ref } from 'vue'
-import { useToast } from '@/composables/useToast.js'
+import { authApi } from '@/api/auth.api.js'
+import {useAuthStore} from "@/store/auth.js";
+import { useToast } from "@/composables/useToast.js"
+import router from "@/router/index.js";
 
 const { showSuccess, showError } = useToast()
 
 export function useLogin() {
+    const auth = useAuthStore()
+
     return useMutation({
         mutationFn: async (credentials) => {
-            // credentials = { username, password }
-            const res = await authApi.login({
-                phone_number: credentials.phone_number,
-                password: credentials.password
-            })
-            localStorage.setItem('access_token', res.access)
-            localStorage.setItem('refresh_token', res.refresh)
+            const res = await authApi.login(credentials)
+            console.log('data is : ')
+            console.log(res.data.data.access)
+            auth.setToken(res.data.data.access) // فقط بعد از 200
             return res
         },
-        onSuccess: () => showSuccess('ورود موفقیت‌آمیز بود!'),
-        onError: (err) => showError(err.response?.data?.detail || 'خطا در ورود')
-    })
-}
-
-export function useRegister() {
-    return useMutation({
-        mutationFn: async (data) => {
-            // data = { username, email, password }
-            return await authApi.register(data)
+        onSuccess: () => {
+            showSuccess('ورود موفقیت‌آمیز بود!')
+            router.push('/dashboard') // ← فقط بعد از موفقیت
         },
-        onSuccess: () => showSuccess('ثبت‌نام موفقیت‌آمیز بود!'),
-        onError: (err) => showError(err.response?.data?.detail || 'خطا در ثبت‌نام')
-    })
-}
-
-export function useLogout() {
-    return useMutation({
-        mutationFn: async () => {
-            localStorage.removeItem('access_token')
-            localStorage.removeItem('refresh_token')
-            await authApi.logout()
-        },
-        onSuccess: () => showSuccess('خروج انجام شد!')
+        onError: (err) => {
+            console.log('خطای ورود:', err)
+            showError(err.response?.data?.detail || 'خطا در ورود')
+            // هیچ ریدایرکتی انجام نمیشه
+        }
     })
 }
