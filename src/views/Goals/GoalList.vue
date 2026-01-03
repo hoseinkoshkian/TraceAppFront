@@ -84,7 +84,10 @@ const goalsData = computed(() => {
     dateForTable: utcToJalali(goal.start_datetime),
     parent :  goal.parent,
     date: utcToJalali(goal.start_datetime),
-    description: goal.description || '—'
+    description: goal.description || '—',
+    start_datetime: goal.start_datetime,  // اضافه کن
+    end_datetime: goal.end_datetime,      // اضافه کن
+    task_patterns: goal.task_patterns || []
   }))
 })
 

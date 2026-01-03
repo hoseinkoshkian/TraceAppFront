@@ -1,4 +1,10 @@
-<!-- src/App.vue -->
+<template>
+  <Toast ref="toast" /> <!-- همیشه mount شده -->
+  <component :is="layout">
+    <RouterView />
+  </component>
+</template>
+
 <script setup>
 import { computed, ref, provide } from 'vue'
 import { useRoute } from 'vue-router'
@@ -13,10 +19,3 @@ provide('toast', toast)
 
 const layout = computed(() => route.meta.layout === 'blank' ? BlankLayout : MainLayout)
 </script>
-
-<template>
-  <component :is="layout">
-    <RouterView />
-    <Toast ref="toast" />
-  </component>
-</template>

@@ -7,6 +7,10 @@ class ProfileApi extends BaseAPI {
         return this.get('/api/v1/users/profile/')
     }
 
+    getUserInfo() {
+        return this.get('/api/v1/users/profile/info')
+    }
+
     // بروزرسانی کامل پروفایل (PUT)
     updateProfile(data) {
         return this.put('/api/v1/users/profile/update', data)

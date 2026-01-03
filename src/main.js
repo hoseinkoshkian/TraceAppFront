@@ -15,8 +15,10 @@ import {createPinia} from "pinia";
 
 
 import Vue3PersianDatetimePicker from 'vue3-persian-datetime-picker'
-
+import {useAuthStore} from "@/store/auth.js";
 const pinia = createPinia()
+
+
 
 app.use(router)
 app.use(pinia)
@@ -41,4 +43,7 @@ app.use(VueQueryPlugin, {
     },
 })
 app.component('PersianDatePicker', Vue3PersianDatetimePicker)
+const auth = useAuthStore(pinia)
+
+auth.init()
 app.mount('#app')

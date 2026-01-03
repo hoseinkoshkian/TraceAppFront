@@ -169,7 +169,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import jalali from 'jalali-moment'
-import { useAddTask, useTasks, useUpdateTask } from "@/api/task.api.js"
+import { useAddTask, useTasks, useUpdateTask } from "@/composables/useTasks.js"
 import { utcToJalali, jalaliToUtc } from '../../utils/date/to_jalali.js'
 import AddTaskModal from "@/components/modal/AddTaskModal.vue"
 

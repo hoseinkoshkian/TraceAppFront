@@ -20,6 +20,22 @@ export function useProfile() {
         refetchOnWindowFocus: false,
     })
 }
+
+
+export function useUserInfo() {
+    return useQuery({
+        queryKey: ['userInfo'],
+        queryFn: async () => {
+            const res = await profileApi.getUserInfo()
+            return res.data
+        },
+        staleTime: 1000 * 60 * 5,
+        retry: 1,
+        refetchOnWindowFocus: false,
+    })
+}
+
+
 /* =======================
    بروزرسانی کامل (PUT)
 ======================= */

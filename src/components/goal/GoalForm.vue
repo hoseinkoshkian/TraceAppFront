@@ -2,7 +2,6 @@
   <form @submit.prevent="submitForm" class="goal-form">
     <!-- Grid اصلی فرم -->
     <div class="form-grid">
-
       <!-- عنوان هدف -->
       <div class="field">
         <label class="field-label">
@@ -78,10 +77,9 @@
             dir="rtl"
         />
       </div>
-
     </div>
 
-    <!-- بخش تسک پترن‌ها - خیلی جذاب و حرفه‌ای -->
+    <!-- بخش تسک پترن‌ها -->
     <div class="task-patterns-section">
       <h3 class="section-title">
         <i class="pi pi-list mr-2"></i>
@@ -91,67 +89,71 @@
         الگوهای تکرارشونده برای ایجاد تسک‌های خودکار (مثل مطالعه روزانه یا تمرین هفتگی)
       </p>
 
-      <MultiSelect
-          v-model="selectedTaskPatterns"
-          :options="allTaskPatterns"
-          optionLabel="name"
-          optionValue="id"
-          placeholder="جستجو و انتخاب تسک پترن‌ها..."
-          class="enhanced-multiselect"
-          display="chip"
-          filter
-          filterPlaceholder="جستجو بر اساس نام یا نوع..."
-          showClear
-          :maxSelectedLabels="5"
-          selectedItemsLabel="{0} پترن انتخاب شده"
-          emptyFilterMessage="پترنی یافت نشد"
-          emptyMessage="هنوز پترنی تعریف نشده"
-      >
-        <!-- نمایش گزینه‌ها در dropdown -->
-        <template #option="{ option }">
-          <div class="pattern-option flex items-center justify-between p-3 hover:bg-indigo-50 rounded-lg transition">
-            <div class="flex items-center gap-3">
-              <div :class="['pattern-icon', `icon-${option.pattern_type}`]">
-                <i :class="getPatternIcon(option.pattern_type)"></i>
-              </div>
-              <div>
-                <div class="font-medium text-gray-900">{{ option.name }}</div>
-                <div class="text-sm text-gray-600 mt-1">
-                  {{ option.description || 'ایجاد تسک به صورت خودکار بر اساس این الگو' }}
+      <div class="relative">
+        <MultiSelect
+            v-model="selectedTaskPatterns"
+            :options="allTaskPatterns"
+            optionLabel="name"
+            optionValue="id"
+            placeholder="جستجو و انتخاب تسک پترن‌ها..."
+            class="enhanced-multiselect"
+            display="chip"
+            filter
+            filterPlaceholder="جستجو بر اساس نام یا نوع..."
+            showClear
+            :maxSelectedLabels="5"
+            selectedItemsLabel="{0} پترن انتخاب شده"
+            emptyFilterMessage="پترنی یافت نشد"
+            emptyMessage="هنوز پترنی تعریف نشده"
+            append-to="self"
+            :loading="isLoadingPatterns"
+        >
+          <!-- گزینه‌ها -->
+          <template #option="{ option }">
+            <div class="pattern-option flex items-center justify-between p-3 hover:bg-indigo-50 rounded-lg transition">
+              <div class="flex items-center gap-3">
+                <div :class="['pattern-icon', `icon-${option.pattern_type}`]">
+                  <i :class="getPatternIcon(option.pattern_type)"></i>
+                </div>
+                <div>
+                  <div class="font-medium text-gray-900">{{ option.name }}</div>
+                  <div class="text-sm text-gray-600 mt-1">
+                    {{ option.description || 'ایجاد تسک به صورت خودکار بر اساس این الگو' }}
+                  </div>
                 </div>
               </div>
+              <span :class="['pattern-badge', `badge-${option.pattern_type}`]">
+                {{ patternTypeLabel(option.pattern_type) }}
+              </span>
             </div>
-            <span :class="['pattern-badge', `badge-${option.pattern_type}`]">
-              {{ patternTypeLabel(option.pattern_type) }}
-            </span>
-          </div>
-        </template>
+          </template>
 
-        <!-- نمایش چیپ‌های انتخاب‌شده -->
-        <template #chip="{ value }">
-          <div class="pattern-chip inline-flex items-center gap-2 bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full">
-            <i :class="getPatternIcon(allTaskPatterns.find(p => p.id === value)?.pattern_type || 'daily')"></i>
-            <span class="font-medium">{{ allTaskPatterns.find(p => p.id === value)?.name }}</span>
-            <span :class="['text-xs px-2 py-0.5 rounded', `badge-${allTaskPatterns.find(p => p.id === value)?.pattern_type}`]">
-              {{ patternTypeLabel(allTaskPatterns.find(p => p.id === value)?.pattern_type) }}
-            </span>
-          </div>
-        </template>
+          <!-- چیپ‌ها -->
+          <template #chip="{ value }">
+            <div class="pattern-chip inline-flex items-center gap-2 bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full">
+              <i :class="getPatternIcon(findPatternById(value)?.pattern_type || 'daily')"></i>
+              <span class="font-medium">{{ findPatternById(value)?.name || 'در حال بارگذاری...' }}</span>
+              <span :class="['text-xs px-2 py-0.5 rounded', `badge-${findPatternById(value)?.pattern_type || 'daily'}`]">
+                {{ patternTypeLabel(findPatternById(value)?.pattern_type || 'daily') }}
+              </span>
+            </div>
+          </template>
 
-        <!-- فوتر -->
-        <template #footer>
-          <div class="multiselect-footer p-3 text-center text-sm text-gray-600 border-t">
-            {{ selectedTaskPatterns.length > 0 ? `${selectedTaskPatterns.length} پترن انتخاب شده` : 'هیچ پترنی انتخاب نشده' }}
-          </div>
-        </template>
-      </MultiSelect>
+          <!-- فوتر -->
+          <template #footer>
+            <div class="multiselect-footer p-3 text-center text-sm text-gray-600 border-t">
+              {{ selectedTaskPatterns.length > 0 ? `${selectedTaskPatterns.length} پترن انتخاب شده` : 'هیچ پترنی انتخاب نشده' }}
+            </div>
+          </template>
+        </MultiSelect>
+      </div>
 
       <small class="hint-text block mt-3">
         می‌توانید چندین پترن را همزمان انتخاب کنید تا تسک‌های تکرارشونده به صورت خودکار ساخته شوند.
       </small>
     </div>
 
-    <!-- دکمه‌های فرم -->
+    <!-- دکمه‌ها -->
     <div class="form-actions">
       <Button
           type="button"
@@ -184,159 +186,203 @@ import Button from 'primevue/button'
 import AutoComplete from 'primevue/autocomplete'
 import DatePicker from 'vue3-persian-datetime-picker'
 import MultiSelect from 'primevue/multiselect'
-import { useToast } from "@/composables/useToast.js"
 
+import { useToast } from '@/composables/useToast.js'
 const { showSuccess, showError } = useToast()
 
-import { useCreateGoal, useUpdateGoal, useGoals, useGoalDetail } from '@/composables/useGoal.js'
+import { useCreateGoal, useUpdateGoal, useGoals } from '@/composables/useGoal.js'
+import { useTaskPatterns } from '@/composables/useTaskPattern.js'
+import {
+  useCreateGoalTaskPattern,
+  useDeleteGoalTaskPattern,
+  useGoalTaskPatterns
+} from '@/composables/useGoalTaskPattern.js'
 
-// Props & Emits
 const props = defineProps({
   initialData: { type: Object, default: () => ({}) }
 })
 const emit = defineEmits(['success', 'cancel'])
 
-// State فرم
+// فرم اصلی
 const form = ref({ title: '', description: '' })
 const jalaliDate = ref(null)
 const jalaliEndDate = ref(null)
 const selectedParent = ref(null)
 
-// Task Patterns
-const allTaskPatterns = ref([
-  { id: '1', name: 'مطالعه روزانه', pattern_type: 'daily', description: 'هر روز یک تسک جدید ایجاد می‌شود' },
-  { id: '2', name: 'تمرین هفتگی', pattern_type: 'weekly', description: 'هر هفته در روز مشخص تسک ساخته می‌شود' },
-  { id: '3', name: 'مرور سفارشی', pattern_type: 'custom', description: 'بر اساس تنظیمات دلخواه تکرار می‌شود' },
-  { id: '4', name: 'ورزش صبحگاهی', pattern_type: 'daily', description: 'هر صبح تسک ورزش اضافه می‌شود' },
-  { id: '5', name: 'جلسه تیمی ماهانه', pattern_type: 'custom', description: 'اول هر ماه جلسه تنظیم شود' },
-])
+// همه تسک پترن‌ها (برای مولتی‌سلکت)
+const { data: allTaskPatternsRaw, isLoading: isLoadingPatterns } = useTaskPatterns()
 
+// ایمن‌سازی: همیشه آرایه باشه حتی قبل از لود شدن داده
+const allTaskPatterns = computed(() => allTaskPatternsRaw.value ?? [])
+
+// تابع جستجو در پترن‌ها — کاملاً ایمن
+const findPatternById = (id) => {
+  if (!id) return null
+  return allTaskPatterns.value.find(p => p.id === id) || null
+}
+
+// پترن‌های متصل به هدف فعلی (در حالت ویرایش)
+const currentGoalId = computed(() => props.initialData?.id || null)
+
+const { data: attachedRelationsRaw } = useGoalTaskPatterns(currentGoalId)
+// ایمن‌سازی روابط
+const attachedRelations = computed(() => attachedRelationsRaw.value ?? [])
+console.log('data is : ' , attachedRelations)
+
+// پترن‌های انتخاب‌شده توسط کاربر (آرایه‌ای از idهای task_pattern)
 const selectedTaskPatterns = ref([])
 
+// پر کردن مولتی‌سلکت در حالت ویرایش
+watch(attachedRelations, (relations) => {
+  selectedTaskPatterns.value = relations.map(rel => rel.pattern.id) // اگر فیلد task_pattern_id بود، اینجا تغییر بده
+}, { immediate: true })
+
+// توابع کمکی برای تمپلیت
 const patternTypeLabel = (type) => {
-  switch (type) {
-    case 'daily': return 'روزانه'
-    case 'weekly': return 'هفتگی'
-    case 'custom': return 'سفارشی'
-    default: return 'نامشخص'
-  }
+  const labels = { daily: 'روزانه', weekly: 'هفتگی', custom: 'سفارشی' }
+  return labels[type] || 'نامشخص'
 }
 
 const getPatternIcon = (type) => {
-  switch (type) {
-    case 'daily': return 'pi pi-sun'
-    case 'weekly': return 'pi pi-calendar'
-    case 'custom': return 'pi pi-cog'
-    default: return 'pi pi-circle'
-  }
+  const icons = { daily: 'pi pi-sun', weekly: 'pi pi-calendar', custom: 'pi pi-cog' }
+  return icons[type] || 'pi pi-circle'
 }
 
-// حالت ویرایش و وضعیت ارسال
-const createMutation = useCreateGoal()
-const updateMutation = useUpdateGoal()
-const isEditMode = computed(() => !!props.initialData?.id)
-const isSubmitting = computed(() => createMutation.isPending.value || updateMutation.isPending.value)
+// mutationهای هدف
+const createGoalMutation = useCreateGoal()
+const updateGoalMutation = useUpdateGoal()
 
-// قوانین اعتبارسنجی
+// mutationهای رابطه Goal ↔ TaskPattern
+const createRelationMutation = useCreateGoalTaskPattern()
+const deleteRelationMutation = useDeleteGoalTaskPattern()
+
+const isEditMode = computed(() => !!props.initialData?.id)
+
+const isSubmitting = computed(() => {
+  return (
+      createGoalMutation.isPending.value ||
+      updateGoalMutation.isPending.value ||
+      createRelationMutation.isPending.value ||
+      deleteRelationMutation.isPending.value
+  )
+})
+
+// Validation
 const rules = {
   title: {
     required: helpers.withMessage('عنوان هدف الزامی است', required),
     minLength: helpers.withMessage('عنوان باید حداقل ۳ کاراکتر باشد', minLength(3))
   },
-  jalaliDate: {
-    required: helpers.withMessage('تاریخ شروع الزامی است', required)
-  }
+  jalaliDate: { required: helpers.withMessage('تاریخ شروع الزامی است', required) }
 }
 const state = computed(() => ({ title: form.value.title, jalaliDate: jalaliDate.value }))
 const v$ = useVuelidate(rules, state)
 
-// Autocomplete اهداف والد
+// جستجوی هدف والد
 const parentSearch = ref('')
-const { data: goalsData } = useGoals(parentSearch)
+const { data: goalsData = [] } = useGoals(parentSearch)
 const parentOptions = ref([])
-watch(goalsData, val => parentOptions.value = val || [])
+watch(goalsData, (val) => { parentOptions.value = val || [] })
 
 const searchParents = (event) => {
   parentSearch.value = event.query || ''
 }
 
-// بارگذاری داده اولیه در حالت ویرایش
-watch(() => props.initialData, val => {
+// پر کردن فرم در حالت ویرایش یا ایجاد جدید
+watch(() => props.initialData, (val) => {
   if (val?.id) {
     form.value.title = val.title || ''
     form.value.description = val.description || ''
     jalaliDate.value = val.dateForTable || null
     jalaliEndDate.value = val.endDateForTable || null
     selectedParent.value = val.parent ? { id: val.parent, title: val.parent_title || 'هدف والد' } : null
-    selectedTaskPatterns.value = val.task_patterns || []
-
-    if (val.parent) {
-      const { data } = useGoalDetail(ref(val.parent))
-      watch(data, (parentData) => {
-        if (parentData) {
-          selectedParent.value = { id: parentData.id, title: parentData.title }
-          parentOptions.value = [selectedParent.value]
-        }
-      }, { immediate: true })
-    }
+    // selectedTaskPatterns توسط watch(attachedRelations) پر می‌شه
   } else {
-    // حالت ایجاد جدید
     form.value = { title: '', description: '' }
     jalaliDate.value = null
     jalaliEndDate.value = null
     selectedParent.value = null
     selectedTaskPatterns.value = []
-    parentOptions.value = []
     v$.value.$reset()
   }
 }, { immediate: true })
 
-// آماده‌سازی داده برای ارسال
-const preparePayload = () => {
+// payload فقط برای هدف (بدون task_patterns)
+const prepareGoalPayload = () => {
   const payload = { title: form.value.title.trim() }
   if (form.value.description?.trim()) payload.description = form.value.description.trim()
-
-  if (jalaliDate.value) {
-    const m = moment(jalaliDate.value, 'jYYYY/jMM/jDD')
-    payload.start_datetime = m.utc().format()
-  }
-
-  if (jalaliEndDate.value) {
-    const mEnd = moment(jalaliEndDate.value, 'jYYYY/jMM/jDD')
-    payload.end_datetime = mEnd.utc().format()
-  } else {
-    payload.end_datetime = null
-  }
-
-  payload.task_patterns = selectedTaskPatterns.value.map(p => p.id || p)
-
+  if (jalaliDate.value) payload.start_datetime = moment(jalaliDate.value, 'jYYYY/jMM/jDD').utc().format()
+  if (jalaliEndDate.value) payload.end_datetime = moment(jalaliEndDate.value, 'jYYYY/jMM/jDD').utc().format()
   if (selectedParent.value?.id) payload.parent = selectedParent.value.id
-
   return payload
 }
 
-// ارسال فرم
+// همگام‌سازی روابط تسک پترن‌ها بعد از ذخیره هدف
+const syncTaskPatternRelations = async (goalId) => {
+  const currentRelations = attachedRelations.value
+  const currentIds = new Set(currentRelations.map(rel => rel.task_pattern))
+  const selectedIds = new Set(selectedTaskPatterns.value)
+
+  const toAdd = [...selectedIds].filter(id => !currentIds.has(id))
+  const toRemove = [...currentIds].filter(id => !selectedIds.has(id))
+
+  const promises = []
+
+  // اضافه کردن روابط جدید
+  toAdd.forEach(taskPatternId => {
+    promises.push(createRelationMutation.mutateAsync({
+      goal: goalId,
+      pattern: taskPatternId
+    }))
+  })
+
+  // حذف روابط قدیمی
+  toRemove.forEach(taskPatternId => {
+    const relation = currentRelations.find(rel => rel.task_pattern === taskPatternId)
+    if (relation?.id) {
+      promises.push(deleteRelationMutation.mutateAsync(relation.id))
+    }
+  })
+
+  if (promises.length > 0) {
+    await Promise.all(promises)
+  }
+}
+
+// submit نهایی
 const submitForm = async () => {
   const isValid = await v$.value.$validate()
   if (!isValid) return
 
   try {
+    let goalId = props.initialData?.id
+
     if (isEditMode.value) {
-      await updateMutation.mutateAsync({ id: props.initialData.id, updates: preparePayload() })
+      await updateGoalMutation.mutateAsync({
+        id: goalId,
+        updates: prepareGoalPayload()
+      })
       showSuccess('هدف با موفقیت ویرایش شد!')
     } else {
-      await createMutation.mutateAsync(preparePayload())
+      const response = await createGoalMutation.mutateAsync(prepareGoalPayload())
+      // تنظیم بر اساس ساختار پاسخ API شما
+      goalId = response.data?.id || response.data?.goal?.id || response.data
       showSuccess('هدف با موفقیت ایجاد شد!')
     }
+
+    // همگام‌سازی روابط تسک پترن‌ها
+    await syncTaskPatternRelations(goalId)
+
     emit('success')
   } catch (error) {
-    console.error('خطا در ذخیره هدف:', error)
+    console.error('خطا در ذخیره هدف یا روابط تسک پترن:', error)
     showError('خطایی رخ داد. لطفاً دوباره تلاش کنید.')
   }
 }
 </script>
 
 <style scoped>
+/* تمام استایل‌های قبلی بدون تغییر */
 .goal-form {
   direction: rtl;
   font-family: 'Vazir', sans-serif;
@@ -405,7 +451,6 @@ const submitForm = async () => {
   margin-top: 0.5rem;
 }
 
-/* بخش تسک پترن‌ها */
 .task-patterns-section {
   margin-top: 2rem;
   padding-top: 2rem;
@@ -426,7 +471,6 @@ const submitForm = async () => {
   margin: 0.5rem 0 1.5rem 0;
 }
 
-/* MultiSelect سفارشی */
 .enhanced-multiselect :deep(.p-multiselect) {
   border-radius: 1rem;
   border: 1px solid #c7d2fe;
@@ -486,7 +530,6 @@ const submitForm = async () => {
   font-weight: 500;
 }
 
-/* دکمه‌ها */
 .form-actions {
   display: flex;
   justify-content: flex-end;
@@ -507,31 +550,23 @@ const submitForm = async () => {
   transform: translateY(-2px);
   box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
 }
-/* محدود کردن ارتفاع چیپ‌ها و جلوگیری از کش آمدن صفحه در موبایل */
+
 .enhanced-multiselect :deep(.p-multiselect-trigger) {
-  min-height: 44px; /* حداقل ارتفاع مناسب برای تاچ */
+  min-height: 44px;
 }
 
 .enhanced-multiselect :deep(.p-multiselect-label) {
   padding: 0.75rem 1rem;
   line-height: 1.4;
-  max-height: 300px;           /* حداکثر ارتفاع ثابت برای قسمت چیپ‌ها */
-  overflow: hidden;           /* اگر چیپ‌ها زیاد شدن، مخفی بشن */
+  max-height: 300px;
+  overflow: hidden;
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
   align-items: center;
 }
 
-/* اگر بخوای چیپ‌ها در چند خط بمونن ولی ارتفاع کلی محدود باشه */
 .enhanced-multiselect :deep(.p-multiselect-token) {
   margin: 0.25rem 0;
-}
-
-/* نسخه بهتر: وقتی تعداد زیاد شد، به جای چند خط، یک متن خلاصه نشون بده */
-.enhanced-multiselect :deep(.p-multiselect-items-label) {
-  white-space: nowrap !important;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 </style>

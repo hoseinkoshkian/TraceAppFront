@@ -1,6 +1,10 @@
 <!-- src/components/Header.vue -->
 <script setup>
 import { ref } from 'vue'
+// import {useUserStore} from "@/store/user.js";
+//
+// const userStore = useUserStore()
+// const { fullName, avatar, isLoading } = storeToRefs(userStore)
 
 const user = ref({
   username: 'hosein',
